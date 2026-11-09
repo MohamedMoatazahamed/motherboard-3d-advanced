@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>اللوحة الأم ثلاثية الأبعاد | Advanced</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap">
+<style>
+:root{--bg:#070b14;--p:#0e1526;--p2:#141d33;--tx:#e8edf8;--mut:#8d9ab8;--ac:#4f8cff;--ac2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--bd:#24304d}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:radial-gradient(1200px 700px at 50% 30%,#14213f 0%,#070b14 70%);color:var(--tx);font-family:Cairo,system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer;color:var(--tx)}
+#app{height:100dvh;display:grid;grid-template-columns:390px 1fr 190px}
+#panel{background:linear-gradient(180deg,var(--p),#0a1020);border-inline-end:1px solid var(--bd);display:flex;flex-direction:column;min-height:0;z-index:3}
+#tabs{display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--bd);background:rgba(8,13,26,.7)}
+#tabs button{flex:1;background:none;border:1px solid transparent;border-radius:10px;padding:6px 2px;font-size:12px;font-weight:600;color:var(--mut);line-height:1.3}
+#tabs button span{display:block;font-size:17px}
+#tabs button.s{background:var(--ac);color:#fff;box-shadow:0 4px 16px rgba(79,140,255,.45)}
+#tc{flex:1;overflow:auto;padding:14px 16px 30px;min-height:0;font-size:14px;line-height:1.85}
+#tc h2{margin:2px 0 4px;font-size:19px}
+#tc h3{margin:16px 0 6px;font-size:14px;color:var(--ac2)}
+#tc p{margin:6px 0}
+#tc small{color:var(--mut)}
+.hd small{display:block;direction:ltr;text-align:start}
+.chip{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:1px 10px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c);border:1px solid var(--c)}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.specs div{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:6px 10px}
+.specs small{display:block;font-size:11px}
+.specs b{font-size:13px;direction:ltr;display:block;text-align:start;unicode-bidi:plaintext}
+.tip{background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:8px 12px}
+.row{display:flex;gap:8px;margin:10px 0}
+.main{flex:1;background:linear-gradient(135deg,var(--ac),#7c5cff);color:#fff;border:0;border-radius:12px;padding:10px;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(79,140,255,.35);width:100%;margin:6px 0}
+.btn{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:7px 12px;font-size:13px}
+.btn:hover,.pi:hover{border-color:var(--ac)}
+.btn.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.card{background:var(--p2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:8px 0}
+.step{display:block;width:100%;text-align:start;background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:7px 12px;margin:5px 0;font-size:14px}
+.step.s{border-color:var(--ac);background:rgba(79,140,255,.22)}
+.rels,#plistM{display:flex;flex-wrap:wrap;gap:6px}
+.pi{background:var(--p2);border:1px solid var(--bd);border-radius:16px;padding:4px 11px;font-size:12px;text-align:start}
+.pi.s{border-color:var(--ac);background:rgba(79,140,255,.3)}
+.pi.off{opacity:.5;text-decoration:line-through}
+.cat{flex-basis:100%;font-size:11px;font-weight:700;color:var(--c);margin-top:6px}
+#parts{background:rgba(10,16,32,.85);border-inline-start:1px solid var(--bd);overflow:auto;padding:10px;display:flex;flex-direction:column;gap:5px;align-items:stretch}
+#parts .pi{border-radius:8px}
+#plistM .cat{margin-top:8px}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#top{position:absolute;top:10px;inset-inline:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+#top>*{pointer-events:auto}
+#top b{font-size:17px;margin-inline-end:auto}
+#top .by{flex-basis:100%;font-size:12px;color:var(--mut);margin-top:-6px;pointer-events:none}
+#bot{position:absolute;bottom:10px;inset-inline:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:center;background:rgba(10,16,32,.72);backdrop-filter:blur(8px);border:1px solid var(--bd);border-radius:14px;padding:7px 10px}
+#bot label{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+input[type=range]{accent-color:var(--ac);width:100%}
+#bot input[type=range]{width:110px}
+input[type=number]{width:74px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px}
+#toast{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:var(--bad);color:#fff;padding:8px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+#tipbox{position:absolute;pointer-events:none;background:rgba(14,21,38,.92);border:1px solid var(--ac);border-radius:8px;padding:3px 9px;font-size:12px;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:6}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;left:0;top:0;background:rgba(14,21,38,.82);border:1px solid var(--bd);font-size:11px;padding:1px 7px;border-radius:6px;white-space:nowrap}
+.lb.s{border-color:var(--ac);background:var(--ac);color:#fff}
+.term{background:#04070d;border:1px solid var(--bd);border-radius:10px;font:12px/1.7 ui-monospace,Consolas,monospace;direction:ltr;text-align:left;padding:10px;min-height:130px;max-height:220px;overflow:auto;margin:8px 0}
+.ok{color:var(--ok)}.wr{color:var(--warn)}.er{color:var(--bad)}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.blk{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;font-weight:700;transition:.25s}
+.blk small{display:block;font-weight:400;direction:ltr;text-align:start;font-size:11px}
+.blk.on{border-color:var(--ac2);background:rgba(34,211,238,.18);box-shadow:0 0 18px rgba(34,211,238,.3)}
+.pg{display:grid;gap:2px;direction:ltr;margin:6px 0}.pg i{font-style:normal;text-align:center;font-size:11px;border-radius:3px;padding:2px 0;color:#fff;min-height:19px}
+.c0{background:#0f7b80}.c1{background:#7c3aed}.c2{background:#2ea05a}.c3{background:#c2410c}
+.bar{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--ac2),var(--ac));margin:2px 0}
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.gauges div{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:6px 10px}
+.gauges small{display:block}.gauges b{font-size:20px;direction:ltr;display:block;text-align:start}
+.badge{display:inline-block;padding:3px 12px;border-radius:20px;font-weight:700;font-size:13px}
+details{background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:6px 12px;margin:6px 0}summary{cursor:pointer;font-weight:700}
+canvas#ch{width:100%;height:auto;background:#04070d;border:1px solid var(--bd);border-radius:10px;cursor:default}
+@media (max-width:980px){
+ #app{grid-template-columns:1fr;grid-template-rows:52dvh 1fr}
+ #stage{order:1}#panel{order:2;border-inline-end:0;border-top:1px solid var(--bd)}#parts{display:none}
+ #tabs button{font-size:11px}#bot input[type=range]{width:80px}#top b{font-size:15px}
+}
+@media (min-width:981px){#plistM{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+ <aside id="panel"><div id="tabs"></div><div id="tc"></div></aside>
+ <main id="stage">
+  <div id="labels"></div><div id="tipbox"></div><div id="toast"></div>
+  <div id="top"><b>🖥️ Motherboard 3D <small style="color:var(--ac2)">Advanced</small></b>
+   <button class="btn" onclick="setAll(false)">اخلع الكل</button>
+   <button class="btn" onclick="setAll(true)">ركّب الكل</button>
+   <button class="btn" id="mu" onclick="muteT()">🔊</button>
+   <span class="by">prepared by TA Essam Mohamed</span></div>
+  <div id="bot">
+   <label>💥 فك الأجزاء <input id="ex" type="range" min="0" max="1" step=".01" value="0"></label>
+   <button class="btn" id="bx" onclick="optT('xray')">🩻 X-Ray</button>
+   <button class="btn" id="bl" onclick="optT('labels')">🏷️ الأسماء</button>
+   <button class="btn on" id="bf" onclick="optT('flow')">⚡ تدفق البيانات</button>
+   <button class="btn" id="ba" onclick="optT('auto')">🔄 دوران</button>
+   <button class="btn" onclick="view('iso')">🧭 زاوية</button>
+   <button class="btn" onclick="view('top')">⬆️ علوي</button>
+   <button class="btn" onclick="view('side')">➡️ جانبي</button>
+  </div>
+ </main>
+ <aside id="parts"></aside>
+</div>
+<script>
+addEventListener('error',function(e){if(!(e.message||(e.target&&e.target.tagName==='SCRIPT'))||document.getElementById('err'))return;var d=document.createElement('div');d.id='err';d.style.cssText='position:fixed;inset:90px 20px auto;margin:auto;max-width:420px;background:#c0392b;color:#fff;padding:14px 16px;border-radius:12px;font-size:14px;line-height:1.8;z-index:20';d.textContent=window.THREE?'حصل خطأ في تشغيل المشهد ثلاثي الأبعاد. جرّب Chrome أو Edge وفعّل Hardware acceleration.':'مكتبة الـ 3D (three.js) ماتحمّلتش. تأكد إن الجهاز متصل بالإنترنت.';document.body.appendChild(d)},true);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script>window.THREE||document.write('<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr'+'ipt>')</script>
+<script>
+/* ================= أدوات عامة ================= */
+const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),Y=.15,shuffle=a=>[...a].sort(()=>Math.random()-.5),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let AC=null,muted=false;
+function snd(f,d,ty,v,when){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=ty||'sine';o.frequency.value=f;g.gain.value=v||.05;o.connect(g);g.connect(AC.destination);const t=AC.currentTime+(when||0);o.start(t);g.gain.setTargetAtTime(0,t+d*.7,d*.12);o.stop(t+d+.15)}catch(e){}}
+function muteT(){muted=!muted;$('mu').textContent=muted?'🔇':'🔊'}
+function toast(t,ok){const e=$('toast');e.textContent=t;e.style.background=ok?'#059669':'';e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,2400)}
+
+/* ================= البيانات التعليمية ================= */
+const CATS=[['الأساسيات','#4f8cff'],['الذاكرة والتخزين','#34d399'],['التوسعة','#fb923c'],['الطاقة والتوصيل','#c084fc']];
+const DATA={
+board:{c:0,n:'اللوحة الأم',en:'Motherboard',d:'الأساس اللي بيربط كل مكونات الكمبيوتر ببعض. لوحة PCB متعددة الطبقات فيها مسارات نحاسية (Traces) بتنقل البيانات والكهرباء بين القطع.',t:'لازم مقاس اللوحة يناسب الكيس: ATX أو Micro-ATX أو Mini-ITX.',s:[['المقاس','ATX / mATX / ITX'],['الطبقات','4 – 8 طبقات نحاس'],['النواقل','PCIe • SATA • USB']],r:['socket','ramslots','pcie','io']},
+socket:{c:0,n:'سوكت المعالج',en:'CPU Socket',d:'المكان اللي بيتركّب فيه المعالج. ليه ذراع تثبيت وآلاف نقاط التلامس، ولازم يتوافق مع نوع المعالج.',t:'المثلث الذهبي الصغير في الركن لازم يتطابق مع مثلث المعالج. اخلع المعالج وشوفه.',s:[['النوع','LGA1700 • AM5'],['التثبيت','ذراع ضغط'],['نقاط التلامس','1700+ نقطة']],r:['cpu','cooler','cpu8']},
+cpu:{c:0,n:'المعالج',en:'CPU (Processor)',d:'عقل الجهاز. بينفذ التعليمات والحسابات وبيتحكم في باقي المكونات. بيتميز بعدد الأنوية (Cores) والتردد (GHz) والكاش.',t:'ركّبه من غير ضغط وبمحاذاة المثلث الذهبي. أي ثني في الدبابيس بيبوّظ السوكت.',s:[['الأنوية','4 – 24'],['التردد','3 – 6 GHz'],['الكاش','L1 / L2 / L3'],['الشركات','Intel • AMD • ARM']],r:['socket','cooler','ramslots','cpu8']},
+cooler:{c:0,n:'مبرد المعالج',en:'CPU Cooler (Heat Sink + Fan)',d:'المشتت المعدني بيوزّع الحرارة والمروحة بتطردها، والمعجون الحراري (Thermal Paste) بيملا الفراغات بينه وبين المعالج. وفيه كمان التبريد السائل (Liquid Cooling).',t:'لازم تخلعه قبل المعالج وتركّبه بعده، والبرنامج هيمنعك لو عملت العكس. جرّب تخلعه وروح لتاب «الأداء».',s:[['النوع','هوائي / سائل'],['المروحة','1500 – 2200 RPM'],['المعجون','Thermal Paste']],r:['cpu','vrm']},
+ramslots:{c:1,n:'خانات الرام',en:'RAM Slots (DIMM)',d:'الأماكن اللي بتركّب فيها شرايح الذاكرة، ولها أقفال على الطرفين بتتقفل لوحدها لما تضغط الرام.',t:'للأداء الأفضل (Dual Channel) ركّب شريحتين في الخانتين 2 و4.',s:[['العدد','2 أو 4'],['القنوات','Dual Channel'],['الأقفال','على الطرفين']],r:['ram','cpu']},
+ram:{c:1,n:'الرام',en:'RAM (Memory)',d:'ذاكرة مؤقتة سريعة بتشيل البرامج والبيانات اللي شغالة دلوقتي، وبتتمسح لما الكهرباء تقطع.',t:'DDR4 وDDR5 مش متوافقين: مكان الفتحة في الريجل بيمنع التركيب الغلط. جرّب تشغّل الإقلاع من غير رام.',s:[['النوع','DDR4 / DDR5'],['السعة','8 – 64 GB'],['السرعة','3200 – 7200 MT/s']],r:['ramslots','cpu']},
+vrm:{c:0,n:'مشتتات VRM',en:'VRM Heatsinks',d:'دوائر تحويل الجهد: بتنزّل 12 فولت من الباور سبلاي لحوالي 1 فولت يناسب المعالج. بتسخن فبيتحط عليها مشتت.',t:'VRM قوي = ثبات أعلى مع المعالجات القوية والأوفركلوك.',s:[['الدخل','12 V'],['الخرج','~1 V'],['المراحل','8 – 20 Phase']],r:['cpu8','cpu']},
+chipset:{c:0,n:'الشيبست',en:'Chipset',d:'بيتحكم في تدفق البيانات بين المعالج والذاكرة والأجهزة (USB وSATA والشبكة والصوت). في اللوحات القديمة كان مقسوم لـ North Bridge وSouth Bridge.',t:'أمثلة: Intel Z790 / AMD B650. وهو اللي بيحدد إمكانيات اللوحة.',s:[['أمثلة','Z790 • B650'],['بيدير','USB • SATA • LAN'],['الاتصال بالمعالج','DMI / PCIe']],r:['cpu','sata','pciex1']},
+pcie:{c:2,n:'خانة PCIe x16',en:'PCIe x16 Slot',d:'أسرع خانة في اللوحة، بتركّب فيها كارت الشاشة غالباً، وفيها ريجل تثبيت في الطرف.',t:'أرقام x1 / x4 / x16 = عدد مسارات البيانات (Lanes)، كل ما زادت زادت السرعة.',s:[['المسارات','16 Lane'],['الجيل','PCIe 4.0 / 5.0'],['السرعة','حتى 63 GB/s']],r:['gpu','cpu']},
+gpu:{c:2,n:'كارت الشاشة',en:'GPU (Graphics Card)',d:'معالج مخصص للرسومات والألعاب والذكاء الاصطناعي، وفيه رام خاصة (VRAM) ومراوح تبريد. بيوصل الشاشات بـ HDMI أو DisplayPort.',t:'بياخد كهرباء إضافية من الباور سبلاي (كابل PCIe 6/8 pin) وبيتثبت بمسمار في الكيس.',s:[['الذاكرة','VRAM 8 – 24 GB'],['الاستهلاك','100 – 450 W'],['الشاشات','HDMI • DisplayPort']],r:['pcie','cpu']},
+pciex1:{c:2,n:'فتحات التوسعة',en:'PCIe x1 Slots (Expansion)',d:'فتحات لكروت التوسعة (Expansion Cards): كروت الصوت والشبكة، ومنافذ USB إضافية ومتحكمات التخزين والتقاط الفيديو وكروت القياس (DAQ).',t:'الكارت بيتركّب عمودي على اللوحة وبيتثبت بمسمار في الكيس.',s:[['المسارات','1 Lane'],['الأنواع','صوت • شبكة • USB • DAQ']],r:['sound','nic','chipset']},
+sound:{c:2,n:'كارت الصوت',en:'Sound Card',d:'بيوصّل السماعات والميكروفونات بجودة صوت أفضل من الصوت المدمج.',t:'بيتركّب في فتحة PCIe.',s:[['الواجهة','PCIe x1'],['المخارج','Line • Mic • Optical']],r:['pciex1']},
+nic:{c:2,n:'كارت الشبكة',en:'NIC (Network Interface Card)',d:'بيوصّل الحاسوب بالشبكة سلكيًا (Ethernet) أو لاسلكيًا (Wi-Fi) لإنترنت عالي السرعة.',t:'معظم اللوحات الحديثة فيها شبكة مدمجة، لكن ممكن تضيف كارت لسرعات أعلى.',s:[['السرعة','1 – 10 Gbps'],['النوع','Ethernet • Wi-Fi']],r:['pciex1']},
+m2:{c:1,n:'خانة M.2',en:'M.2 SSD Slot',d:'خانة صغيرة لهارد SSD بشكل شريحة. بتدعم NVMe وبتوصل مباشرة بالمعالج من غير كابلات.',t:'الهارد بيتركّب بزاوية صغيرة ثم يتضغط وينثبت بمسمار في الطرف.',s:[['الواجهة','PCIe NVMe • SATA'],['المقاسات','2242 • 2280 • 22110']],r:['ssd','cpu']},
+ssd:{c:1,n:'هارد NVMe SSD',en:'NVMe SSD',d:'تخزين فلاش سريع جداً بيستخدم PCIe، أسرع بكتير من هارد SATA والهارد العادي.',t:'ممكن يوصل لـ 7000 MB/s أو أكتر حسب الجيل (Gen4 / Gen5). من غيره الجهاز مالوش جهاز إقلاع.',s:[['الواجهة','PCIe Gen4 / Gen5'],['السرعة','7000+ MB/s'],['الشكل','M.2 2280']],r:['m2']},
+sata:{c:1,n:'منافذ SATA',en:'SATA Ports',d:'منافذ لتوصيل هاردات SATA وسواقات الأقراص بكابل بيانات، وبتحتاج كابل كهرباء منفصل من الباور سبلاي.',t:'سرعتها تقريباً 600 MB/s، أقل بكتير من NVMe.',s:[['السرعة','600 MB/s'],['العدد','4 – 8 منافذ']],r:['chipset']},
+atx24:{c:3,n:'كونكتور 24-Pin',en:'24-Pin ATX Power',d:'الكابل الرئيسي لتغذية اللوحة من الباور سبلاي (PSU).',t:'الكونكتور ليه قفل ومش بيدخل غير باتجاه واحد.',s:[['الجهود','+12 • +5 • +3.3 V'],['الدبابيس','24 Pin']],r:['cpu8','chipset']},
+cpu8:{c:3,n:'كونكتور 8-Pin للمعالج',en:'8-Pin CPU Power (EPS)',d:'بيدي المعالج تغذية إضافية مباشرة من الباور سبلاي، لأنه بيسحب تيار عالي.',t:'من غيره الجهاز مش هيشتغل أو هيفصل تحت الحمل.',s:[['الجهد','+12 V'],['الدبابيس','8 Pin (4+4)']],r:['vrm','cpu']},
+battery:{c:3,n:'بطارية CMOS',en:'CMOS Battery (CR2032)',d:'بطارية صغيرة بتحافظ على إعدادات الـ BIOS والتاريخ والساعة لما الجهاز مقفول.',t:'لو خلعتها دقائق هيتعمل Reset لإعدادات BIOS، وده حل لمشاكل كتير. جرّب تشغّل الإقلاع من غيرها.',s:[['النوع','CR2032'],['الجهد','3 V'],['العمر','3 – 5 سنين']],r:['bios']},
+io:{c:3,n:'لوحة المنافذ الخلفية',en:'Rear I/O Ports',d:'المنافذ الخلفية: USB وHDMI/DisplayPort وLAN ومخارج الصوت.',t:'بيجي معاها إطار معدني (I/O Shield) بيتركّب في الكيس.',s:[['المنافذ','USB • LAN • Audio'],['الشاشة','HDMI • DP']],r:['chipset']},
+bios:{c:3,n:'شريحة BIOS / UEFI',en:'BIOS / UEFI Chip',d:'برنامج صغير مخزّن في اللوحة، أول حاجة بتشتغل لما تفتح الجهاز: بيفحص المكونات وبيبدأ تحميل النظام. BIOS هو القديم (واجهة نصية)، وUEFI هو الحديث (واجهة رسومية وماوس وأقراص كبيرة وإقلاع آمن).',t:'ادخل الإعدادات بـ Del أو F2 أو F10 أو F12 حسب الشركة.',s:[['القديم','BIOS (نصي)'],['الحديث','UEFI (رسومي)'],['الدخول','Del • F2 • F10 • F12']],r:['battery','cpu']}
+};
+const keyOf=id=>/^ram\d$/.test(id)?'ram':id;
+const lab=id=>/^ram\d$/.test(id)?'RAM #'+id.slice(3):DATA[id].n;
+
+/* ================= مشهد three.js ================= */
+const PT={},ORDER=[],meshes=[],RGB=[],FANS=[];
+const LIFT={cpu:5,cooler:7,ram1:5,ram2:5,ram3:5,ram4:5,gpu:6,ssd:4,battery:3,sound:4,nic:4};
+const EXPL={board:0,socket:.6,ramslots:.6,pcie:.6,pciex1:.6,m2:.6,sata:.6,chipset:1,vrm:1.2,battery:1.5,io:1.2,bios:.8,atx24:1.5,cpu8:1.5,cpu:2.2,cooler:4.2,ssd:2,ram1:2.6,ram2:2.6,ram3:2.6,ram4:2.6,gpu:3.6,sound:2.6,nic:2.6};
+const stage=$('stage');
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+stage.prepend(R.domElement);
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x070b14,30,62);
+const cam=new THREE.PerspectiveCamera(42,1,.1,200);
+scene.add(new THREE.HemisphereLight(0xbcd0ff,0x1b2440,.85));
+const dl=new THREE.DirectionalLight(0xffffff,.95);dl.position.set(8,16,10);dl.castShadow=true;dl.shadow.mapSize.set(2048,2048);
+Object.assign(dl.shadow.camera,{left:-13,right:13,top:13,bottom:-13,near:1,far:50});dl.shadow.bias=-.0006;scene.add(dl);
+const pl1=new THREE.PointLight(0x22d3ee,.7,34);pl1.position.set(-10,4,6);scene.add(pl1);
+const pl2=new THREE.PointLight(0xe879f9,.6,34);pl2.position.set(10,4,-9);scene.add(pl2);
+{const gr=new THREE.Mesh(new THREE.CircleGeometry(15,64),new THREE.MeshStandardMaterial({color:0x0a1122,roughness:.9,metalness:.1}));gr.rotation.x=-Math.PI/2;gr.position.y=-.2;gr.receiveShadow=true;scene.add(gr);
+ const gd=new THREE.GridHelper(30,30,0x22345f,0x131d38);gd.position.y=-.19;scene.add(gd);
+ const rg=new THREE.Mesh(new THREE.RingGeometry(14.6,14.85,96),new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.35,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=-.18;scene.add(rg)}
+
+const mat=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.3},o));
+function bx(g,w,h,d,c,x,y,z,o){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c,o));m.position.set(x||0,y||0,z||0);g.add(m);return m}
+function cy(g,r,h,c,x,y,z,o,ax){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat(c,o));m.position.set(x||0,y||0,z||0);if(ax==='z')m.rotation.x=Math.PI/2;if(ax==='x')m.rotation.z=Math.PI/2;g.add(m);return m}
+function lite(g,w,h,d,x,y,z,off){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:0xffffff}));m.position.set(x,y,z);g.add(m);RGB.push([m.material,off]);return m}
+function fan(g,r,n,col,x,y,z,ax,type){const c=new THREE.Group();c.position.set(x,y,z);if(ax==='z')c.rotation.x=Math.PI/2;g.add(c);const s=new THREE.Group();c.add(s);cy(s,r*.26,.14,0x0b0d12);
+ for(let i=0;i<n;i++){const pv=new THREE.Group();pv.rotation.y=i/n*Math.PI*2;s.add(pv);const b=bx(pv,r*.62,.025,r*.3,col,r*.6,0,0);b.rotation.x=.45}
+ FANS.push({s,type});return c}
+function part(id,x,y,z,fn){const g=new THREE.Group();g.position.set(x,y,z);const ex=fn(g)||{};scene.add(g);
+ const p={id,g,home:y,on:true,rem:id in LIFT,mats:[],ex:EXPL[id]||0,x:ex,fl:0,fc:0};
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.userData.id=id;meshes.push(o);if(o.material.emissive)p.mats.push(o.material)}});
+ const b=new THREE.Box3().setFromObject(g);p.c=b.getCenter(new THREE.Vector3()).sub(g.position);p.top=b.max.y-g.position.y;
+ PT[id]=p;ORDER.push(id);return p}
+const GOLD=0xd4af37,SIL=0xc9ced9,DK=0x20242e;
+
+/* مسارات البيانات (x,z) تُرسم على اللوحة وتتحرك عليها الجسيمات */
+const PATHS=[
+ {k:'ram',col:0x22d3ee,p:[[-.5,-1.5],[1.4,-1.1],[3.2,-1]],need:()=>PT.cpu.on&&[1,2,3,4].some(i=>PT['ram'+i].on)},
+ {k:'gpu',col:0xfb923c,p:[[-1.2,-.4],[-1.2,1.6],[-1.2,2.9]],need:()=>PT.cpu.on&&PT.gpu.on},
+ {k:'chip',col:0xc084fc,p:[[.8,-.2],[2.2,2.4],[3.8,4]],need:()=>PT.cpu.on},
+ {k:'ssd',col:0x34d399,p:[[-.2,-.4],[-.2,.9]],need:()=>PT.cpu.on&&PT.ssd.on},
+ {k:'sata',col:0x60a5fa,p:[[3.8,4],[5.3,3.8]],need:()=>PT.cpu.on}
+];
+function silk(){const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d'),m=v=>(v+6)/12*1024;
+ let s=11;const rn=()=>(s=s*16807%2147483647)/2147483647;
+ x.fillStyle='#0f5c36';x.fillRect(0,0,1024,1024);x.lineCap='round';
+ x.strokeStyle='rgba(150,255,190,.2)';x.lineWidth=2.5;
+ for(let i=0;i<170;i++){let px=rn()*1024,py=rn()*1024;x.beginPath();x.moveTo(px,py);for(let k=0;k<4;k++){if(k%2)px+=(rn()-.5)*260;else py+=(rn()-.5)*260;x.lineTo(px,py)}x.stroke()}
+ x.strokeStyle='rgba(255,215,110,.5)';x.lineWidth=2;
+ PATHS.forEach(b=>{for(let k=-3;k<=3;k++){x.beginPath();b.p.forEach((q,i)=>{const X=m(q[0])+k*5,Z=m(q[1])+k*5;i?x.lineTo(X,Z):x.moveTo(X,Z)});x.stroke()}});
+ x.fillStyle='rgba(212,175,55,.6)';for(let i=0;i<420;i++){x.beginPath();x.arc(rn()*1024,rn()*1024,1.8+rn()*2,0,7);x.fill()}
+ x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=3;x.fillStyle='rgba(255,255,255,.88)';x.font='700 22px monospace';x.textAlign='center';
+ const box=(cx,cz,w,d,t)=>{x.strokeRect(m(cx-w/2),m(cz-d/2),w/12*1024,d/12*1024);x.fillText(t,m(cx),m(cz-d/2)-8)};
+ box(-.5,-1.5,3.2,3.2,'CPU SOCKET');box(3.75,-1,2.3,5.2,'DDR5 DIMM');box(-.5,2.9,7.4,.8,'PCIEX16');box(-.5,.9,2.8,.8,'M.2');box(-2,5.2,3.4,1.5,'PCIEX1');box(1.5,5.1,1.2,1,'BIOS');box(5.3,3.8,1.2,2.6,'SATA');box(3.8,4,2.2,2.2,'CHIPSET');box(-5,3,1.2,1.2,'CMOS');
+ x.font='700 30px monospace';x.fillText('ATX • Z790 • 2026',m(-1.5),m(5.75));
+ const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t}
+let LED;
+part('board',0,0,0,g=>{bx(g,12,.3,12,0x0d4f2e,0,0,0,{roughness:.65,metalness:.15});
+ const pl=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshStandardMaterial({map:silk(),roughness:.65,metalness:.15}));pl.rotation.x=-Math.PI/2;pl.position.y=.152;g.add(pl);
+ for(let i=0;i<9;i++){const x=-2.6+i*.55;cy(g,.17,.4,0x111418,x,.34,-5.5,{metalness:.2});cy(g,.17,.02,0xc0c6d4,x,.54,-5.5,{metalness:.9})}
+ LED=new THREE.Mesh(new THREE.BoxGeometry(.32,.1,.32),new THREE.MeshBasicMaterial({color:0x34d399}));LED.position.set(4.8,.2,-5.2);g.add(LED)});
+part('socket',-.5,Y+.1,-1.5,g=>{bx(g,2.8,.2,2.8,0x9aa3b2,0,0,0,{metalness:.5});bx(g,2.3,.06,2.3,DK,0,.12);
+ for(let i=0;i<6;i++)for(let j=0;j<6;j++)bx(g,.14,.03,.14,GOLD,-.65+i*.26,.16,-.65+j*.26,{metalness:.9});
+ bx(g,.25,.03,.25,0xffcc33,-1.1,.15,1.1);bx(g,.1,.12,2.5,SIL,1.5,.12,0,{metalness:.8})});
+part('cpu',-.5,Y+.3,-1.5,g=>{bx(g,2,.1,2,0x2e7d4f,0,0,0,{roughness:.6});bx(g,1.55,.1,1.55,0xc4cad6,0,.09,0,{metalness:.8,roughness:.25});bx(g,.2,.03,.2,0xffcc33,-.85,.06,.85);
+ const gl=new THREE.Mesh(new THREE.BoxGeometry(1.52,.02,1.52),new THREE.MeshBasicMaterial({color:0xff4a1c,transparent:true,opacity:0,depthWrite:false}));gl.position.y=.15;g.add(gl);return{gl}});
+part('cooler',-.5,Y+.46,-1.5,g=>{bx(g,2.7,.16,2.7,0xb87333,0,.08,0,{metalness:.85,roughness:.3});
+ for(let i=0;i<4;i++)cy(g,.08,2.5,0xb87333,-.9+i*.6,.34,0,{metalness:.9,roughness:.3},'z');
+ for(let i=0;i<22;i++)bx(g,2.9,.9,.035,0xaeb6c6,0,.61,-1.25+i*.119,{metalness:.7,roughness:.35});
+ bx(g,3,.16,.25,0x14171f,0,1.12,1.375);bx(g,3,.16,.25,0x14171f,0,1.12,-1.375);bx(g,.25,.16,3,0x14171f,1.375,1.12,0);bx(g,.25,.16,3,0x14171f,-1.375,1.12,0);
+ fan(g,1.25,7,0x3b4a6b,0,1.2,0,'y','cpu');
+ const t=new THREE.Mesh(new THREE.TorusGeometry(1.3,.04,8,48),new THREE.MeshBasicMaterial({color:0xffffff}));t.rotation.x=Math.PI/2;t.position.y=1.22;g.add(t);RGB.push([t.material,.3])});
+part('ramslots',0,Y+.1,-1,g=>{for(let i=0;i<4;i++){const x=3+i*.5;bx(g,.28,.2,5,DK,x);bx(g,.3,.3,.25,0x555c6e,x,.05,2.6);bx(g,.3,.3,.25,0x555c6e,x,.05,-2.6)}});
+for(let i=0;i<4;i++)part('ram'+(i+1),3+i*.5,Y+.75,-1,g=>{bx(g,.08,1.15,4.8,0x1c6b3f);bx(g,.06,.85,4.7,0x2d3345,.07,.15,0,{metalness:.6});bx(g,.06,.85,4.7,0x2d3345,-.07,.15,0,{metalness:.6});bx(g,.1,.1,4.6,GOLD,0,-.55,0,{metalness:.9});lite(g,.12,.07,4.3,0,.62,0,i*.12)});
+part('vrm',0,Y+.4,0,g=>{bx(g,.8,.8,3.2,0x4a5368,-3.4,0,-1.5,{metalness:.6});bx(g,3.6,.8,.8,0x4a5368,-.5,0,-4.3,{metalness:.6});
+ for(let i=0;i<6;i++){bx(g,.8,.5,.06,0x7b8499,-3.4,.55,-2.9+i*.55,{metalness:.7});bx(g,.06,.5,.8,0x7b8499,-2.2+i*.55,.55,-4.3,{metalness:.7})}});
+part('chipset',3.8,Y+.2,4,g=>{bx(g,1.8,.4,1.8,0x6b7487,0,0,0,{metalness:.6});for(let i=0;i<5;i++)bx(g,1.6,.25,.12,0x8e97a8,0,.3,-.7+i*.35,{metalness:.7})});
+part('pcie',-.5,Y+.1,2.9,g=>{bx(g,7,.2,.45,DK);bx(g,6.9,.04,.12,0x0b0d12,0,.12);bx(g,.3,.25,.5,0x555c6e,3.7,.03)});
+part('gpu',-.5,Y+1.85,2.9,g=>{bx(g,7,3.5,.12,0x15304f);bx(g,6.4,3.1,1.2,0x23283a,0,.1,.7,{metalness:.5});bx(g,6.6,3.2,.06,0x1c1f29,0,.05,-.12,{metalness:.6});
+ bx(g,4.5,.3,.12,GOLD,0,-1.6,0,{metalness:.9});bx(g,.1,3.9,.7,SIL,-3.55,.1,.25,{metalness:.8});bx(g,1,.3,.5,0x111111,2.4,1.75,.4);
+ [-1.6,1.6].forEach(x=>{cy(g,1.38,.06,0x07090d,x,.1,1.31,{},'z');fan(g,1.25,9,0x4a5575,x,.1,1.36,'z','gpu')});
+ lite(g,5.8,.05,.05,0,1.5,1.34,.5)});
+part('m2',-.5,Y+.1,.9,g=>{bx(g,.5,.2,.5,DK,-1.2);cy(g,.12,.2,GOLD,.95,0,0,{metalness:.9})});
+part('ssd',-.65,Y+.28,.9,g=>{bx(g,2.4,.08,.55,0x3a2d5c);bx(g,.7,.05,.4,0x111111,-.5,.06);bx(g,.5,.05,.4,0x111111,.2,.06);bx(g,.3,.06,.5,GOLD,-1.1,0,0,{metalness:.9});bx(g,.45,.03,.3,0x22d3ee,.8,.06)});
+part('atx24',5.4,Y+.3,-1.6,g=>{bx(g,.6,.6,3,0xe8e4d8);bx(g,.3,.05,2.8,0x222222,0,.31);const cs=[0xfacc15,0xdc2626,0x111827,0x16a34a,0x2563eb];for(let k=0;k<12;k++)cy(g,.06,1.6,cs[k%5],1.1,.12,-1.1+k*.2,{},'x')});
+part('cpu8',-4.4,Y+.3,-5.3,g=>{bx(g,1.6,.6,.6,0xe8e4d8);bx(g,1.4,.05,.3,0x222222,0,.31);for(let k=0;k<8;k++)cy(g,.06,1.6,k%2?0xfacc15:0x111827,-.7+k*.2,.1,-1.1,{},'z')});
+part('sata',5.3,Y+.2,3.8,g=>{[-1.2,-.4,.4,1.2].forEach(z=>{bx(g,.6,.4,.7,0x1a1d26,0,0,z);bx(g,.2,.25,.7,0x2a2f3c,-.2,.2,z)})});
+part('battery',-5,Y+.18,3,g=>{bx(g,1.1,.14,1.1,0x15181f,0,-.06);cy(g,.5,.12,SIL,0,.02,0,{metalness:.9})});
+part('io',-5.3,Y+.9,-1.5,g=>{bx(g,1,1.8,4,0x9aa3b2,0,0,0,{metalness:.7});[[-1.4,0x1f6feb],[-.5,0x1a1d26],[.4,0x1f6feb],[1.3,0x2d8a4e]].forEach(a=>bx(g,.06,.4,.7,a[1],-.52,-.1,a[0]));bx(g,.06,.5,.9,0xc9ced9,-.52,.6,-.3,{metalness:.8});bx(g,.06,.35,.7,0x0b0d12,-.52,.6,1.1)});
+part('bios',1.5,Y+.05,5.1,g=>{bx(g,.9,.1,.8,0x1a1d26);bx(g,.5,.02,.4,SIL,0,.06,0,{metalness:.8})});
+part('pciex1',-2,Y+.1,4.9,g=>{bx(g,3,.2,.3,DK);bx(g,3,.2,.3,DK,0,0,.6)});
+part('sound',-2,Y+.9,4.9,g=>{bx(g,3,1.6,.1,0x6d28d9);bx(g,1.8,.25,.12,GOLD,0,-.7,0,{metalness:.9});[-1,-.6,-.2].forEach((x,i)=>bx(g,.25,.3,.3,[0x2d8a4e,0x1f6feb,0xdb2777][i],x,.7,.1))});
+part('nic',-2,Y+.9,5.5,g=>{bx(g,3,1.6,.1,0x1f6b8a);bx(g,1.8,.25,.12,GOLD,0,-.7,0,{metalness:.9});bx(g,.8,.6,.5,SIL,-1,.5,.2,{metalness:.8})});
+
+/* تدفق البيانات */
+const FL=PATHS.map(f=>{const cv=new THREE.CatmullRomCurve3(f.p.map(a=>new THREE.Vector3(a[0],.3,a[1])));
+ const grp=new THREE.Group();scene.add(grp);
+ grp.add(new THREE.Mesh(new THREE.TubeGeometry(cv,32,.03,6,false),new THREE.MeshBasicMaterial({color:f.col,transparent:true,opacity:.35})));
+ const ps=[];for(let i=0;i<9;i++){const q=new THREE.Mesh(new THREE.SphereGeometry(.09,8,8),new THREE.MeshBasicMaterial({color:f.col}));grp.add(q);ps.push(q)}
+ return{need:f.need,cv,grp,ps}});
+
+/* ================= الكاميرا ================= */
+const V={th:.62,ph:1,r:21,tx:0,ty:.6,tz:0,vth:0,vph:0,g:null};
+let flowOn=true,xray=false,labelsOn=false,auto=false,exT=0,exCur=0,sel='board',hov=null,qHint=null,ledForce=null;
+function view(k){V.g={r:21,tx:0,ty:.6,tz:0,th:V.th,ph:V.ph};if(k==='iso'){V.g.th=.62;V.g.ph=1}if(k==='top'){V.g.ph=.12;V.g.th=0}if(k==='side'){V.g.ph=1.4;V.g.th=Math.PI/2}}
+function fcs(id){const p=PT[id],b=id==='board';V.g={r:b?21:id==='gpu'?14:9.5,tx:b?0:p.g.position.x+p.c.x,ty:b?.6:p.g.position.y+p.c.y,tz:b?0:p.g.position.z+p.c.z,th:V.th,ph:Math.min(V.ph,1.05)}}
+function camUpdate(){if(V.g){let done=true;for(const k of['r','tx','ty','tz','th','ph']){let d=V.g[k]-V[k];if(k==='th')d=((d+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;V[k]+=d*.085;if(Math.abs(d)>.01)done=false}if(done)V.g=null}
+ if(auto&&!V.g)V.th+=.004;V.th+=V.vth;V.ph=clamp(V.ph+V.vph,.08,1.5);V.vth*=.86;V.vph*=.86;
+ cam.position.set(V.tx+V.r*Math.sin(V.ph)*Math.sin(V.th),V.ty+V.r*Math.cos(V.ph),V.tz+V.r*Math.sin(V.ph)*Math.cos(V.th));cam.lookAt(V.tx,V.ty,V.tz)}
+const cv=R.domElement,ptrs=new Map(),ray=new THREE.Raycaster(),mp=new THREE.Vector2();let downAt=null;
+function hit(e){const r=cv.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam);const h=ray.intersectObjects(meshes);return h.length?h[0].object.userData.id:null}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);try{cv.setPointerCapture(e.pointerId)}catch(_){}downAt={x:e.clientX,y:e.clientY};V.g=null;cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);
+ if(!p){const id=hit(e);hov=id;cv.style.cursor=id?'pointer':'grab';const tb=$('tipbox');if(id){tb.textContent=lab(id);tb.style.left=(e.clientX-stage.getBoundingClientRect().left+14)+'px';tb.style.top=(e.clientY-stage.getBoundingClientRect().top-30)+'px';tb.style.opacity=1}else tb.style.opacity=0;return}
+ if(ptrs.size===2){const a=[...ptrs.values()],d0=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);ptrs.set(e.pointerId,[e.clientX,e.clientY]);const b=[...ptrs.values()],d1=Math.hypot(b[0][0]-b[1][0],b[0][1]-b[1][1]);if(d1>0)V.r=clamp(V.r*d0/d1,6,38);return}
+ const dx=e.clientX-p[0],dy=e.clientY-p[1];
+ if((e.buttons&2)||e.shiftKey){const k=V.r*.0016;V.tx-=dx*k*Math.cos(V.th);V.tz+=dx*k*Math.sin(V.th);V.tx+=dy*k*Math.sin(V.th);V.tz+=dy*k*Math.cos(V.th)}
+ else{V.vth-=dx*.0025;V.vph-=dy*.0025}
+ ptrs.set(e.pointerId,[e.clientX,e.clientY])});
+const upH=e=>{ptrs.delete(e.pointerId);cv.style.cursor='grab';if(downAt&&ptrs.size===0&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<6){const id=hit(e);if(id){if(!qz&&cur!==0&&cur!==4)tab(0);pick(id,0)}}downAt=null};
+cv.addEventListener('pointerup',upH);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);downAt=null});
+cv.addEventListener('pointerleave',()=>{hov=null;$('tipbox').style.opacity=0});
+cv.addEventListener('wheel',e=>{e.preventDefault();V.g=null;V.r=clamp(V.r*(e.deltaY>0?1.1:.9),6,38)},{passive:false});
+cv.addEventListener('dblclick',e=>{const id=hit(e);if(id&&PT[id].rem){pick(id,0);toggle(id)}});
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);resize();
+$('ex').oninput=e=>exT=+e.target.value;
+
+/* ================= خيارات العرض ================= */
+function optT(k){if(k==='xray'){xray=!xray;$('bx').classList.toggle('on',xray);applyX()}
+ if(k==='labels'){labelsOn=!labelsOn;$('bl').classList.toggle('on',labelsOn)}
+ if(k==='flow'){flowOn=!flowOn;$('bf').classList.toggle('on',flowOn)}
+ if(k==='auto'){auto=!auto;$('ba').classList.toggle('on',auto)}}
+function applyX(){ORDER.forEach(id=>PT[id].mats.forEach(m=>{const t=xray&&id!==sel,o=t?.22:1;if(m.transparent!==t||m.opacity!==o){m.transparent=t;m.opacity=o;m.depthWrite=!t;m.needsUpdate=true}}))}
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();
+ if(k==='e'){exT=exT>.5?0:1;$('ex').value=exT}if(k==='x')optT('xray');if(k==='l')optT('labels');if(k==='f')optT('flow');if(k==='r')view('iso');if(k===' '){e.preventDefault();optT('auto')}});
+
+/* ================= التركيب والخلع والاختيار ================= */
+function toggle(id,want){const p=PT[id];if(!p||!p.rem)return false;if(want===undefined)want=!p.on;if(want===p.on)return false;
+ if(id==='cpu'&&!want&&PT.cooler.on){toast('اخلع المبرد الأول قبل المعالج');snd(160,.2,'square',.04);return false}
+ if(id==='cooler'&&want&&!PT.cpu.on){toast('ركّب المعالج الأول قبل المبرد');snd(160,.2,'square',.04);return false}
+ p.on=want;p.fl=.8;p.fc=want?0x34d399:0xfbbf24;snd(want?520:340,.09,'triangle',.05);snd(want?780:240,.08,'triangle',.04,.07);
+ ledForce=null;afterChange();return true}
+function setAll(on){const o=on?ORDER:[...ORDER].reverse();o.forEach(id=>PT[id].rem&&toggle(id,on))}
+function afterChange(){renderList();renderInfo();if(ch)chCheck();if(cur===1)bootWarn()}
+function pick(id,f){if(qz&&qHook(id))return;sel=id;if(f)fcs(id);applyX();renderList();renderInfo()}
+function hl(id){sel=id;fcs(id);applyX();renderList()}
+function renderList(){const h=CATS.map((c,ci)=>`<div class="cat" style="--c:${c[1]}">${c[0]}</div>`+ORDER.filter(id=>DATA[keyOf(id)].c===ci).map(id=>`<button class="pi ${id===sel?'s':''} ${PT[id].on?'':'off'}" onclick="pick('${id}',1)">${PT[id].rem?'⇅ ':''}${lab(id)}</button>`).join('')).join('');
+ ['parts','plistM'].forEach(i=>{const e=$(i);if(e)e.innerHTML=h})}
+function renderInfo(){if(cur!==0)return;const k=keyOf(sel),d=DATA[k],p=PT[sel],c=CATS[d.c],nm=k==='ram'?d.n+' #'+sel.slice(3):d.n;
+ $('tc').innerHTML=`<div class="hd"><span class="chip" style="--c:${c[1]}">${c[0]}</span><h2>${nm}</h2><small>${d.en}</small></div><p>${d.d}</p>
+ <div class="specs">${d.s.map(s=>`<div><small>${s[0]}</small><b>${s[1]}</b></div>`).join('')}</div>
+ ${d.t?`<p class="tip">💡 ${d.t}</p>`:''}
+ <div class="row">${p.rem?`<button class="main" style="margin:0" onclick="toggle('${sel}')">${p.on?'⬆️ اخلع القطعة':'⬇️ ركّب القطعة'}</button>`:''}<button class="btn" onclick="fcs('${sel}')">🎯 تقريب</button></div>
+ <h3>🔗 مرتبطة بـ</h3><div class="rels">${d.r.map(r=>`<button class="pi" onclick="pick('${r}',1)">${lab(r)}</button>`).join('')}</div>
+ <h3>كل القطع</h3><div id="plistM"></div>`;renderList()}
+
+/* ================= محاكي الحرارة والأداء ================= */
+const S={load:35,amb:28,oc:false,temp:35,clock:0,fan:.2,power:0,trip:false,hist:[]};let histT=0;
+function simStep(dt){const cpu=PT.cpu.on,cool=PT.cooler.on;
+ if(!cpu){S.power=0;S.clock=0;S.fan*=.95;S.temp+=(S.amb-S.temp)*dt*.4;return}
+ if(S.trip){S.power=2;S.clock=0;S.fan+=(cool?1:0-S.fan)*dt;S.temp+=(S.amb-S.temp)*dt*(cool?.25:.08);return}
+ const load=S.load/100,thr=clamp(1-(S.temp-90)/22,.35,1),base=S.oc?4.6:3.8;
+ S.clock=base*thr;S.power=(12+load*(S.oc?125:88))*Math.pow(thr,2.2);
+ const rth=cool?.62-.2*S.fan:2.2,ss=S.amb+S.power*rth;
+ S.temp+=(ss-S.temp)*(1-Math.exp(-dt/(cool?5:6)));
+ S.fan+=((cool?clamp((S.temp-38)/40,.2,1):0)-S.fan)*Math.min(1,dt*2);
+ if(S.temp>=105){S.trip=true;toast('🔥 Thermal Shutdown: المعالج فصل لحماية نفسه!');snd(880,.5,'sawtooth',.05);snd(440,.6,'sawtooth',.05,.3)}
+ histT+=dt;if(histT>.25){histT=0;S.hist.push([S.temp,S.clock]);if(S.hist.length>120)S.hist.shift()}}
+function restartCPU(){if(S.temp>70){toast('استنى المعالج يبرد شوية (أقل من 70°م)');return}S.trip=false;toast('تم إعادة التشغيل',1)}
+function thermalH(){return `<h2>🌡️ محاكي الحرارة والأداء</h2><p>غيّر الحمل وشوف الحرارة والتردد والمراوح. وبعدين اخلع المبرد وشوف المعالج بيعمل إيه! 🔥</p>
+ <label>حمل المعالج: <b id="v1">${S.load}%</b></label><input type="range" min="0" max="100" value="${S.load}" oninput="S.load=+this.value;$('v1').textContent=this.value+'%'">
+ <label>حرارة الغرفة: <b id="v2">${S.amb}°م</b></label><input type="range" min="15" max="45" value="${S.amb}" oninput="S.amb=+this.value;$('v2').textContent=this.value+'°م'">
+ <label><input type="checkbox" ${S.oc?'checked':''} onchange="S.oc=this.checked"> Overclock (تردد أعلى + حرارة أكتر)</label>
+ <div class="gauges"><div><small>الحرارة</small><b id="g1">--</b></div><div><small>التردد</small><b id="g2">--</b></div><div><small>المروحة</small><b id="g3">--</b></div><div><small>الطاقة</small><b id="g4">--</b></div></div>
+ <div id="stt"></div><canvas id="ch" width="340" height="130"></canvas><small>الأحمر: الحرارة • الأزرق: التردد • الخط المتقطع: حد التبطيء 90°</small>
+ <button class="main" onclick="restartCPU()">♻️ إعادة تشغيل بعد الحماية</button>
+ <p class="tip">Thermal Throttling: لما الحرارة تعدّي حوالي 90°م المعالج يقلّل التردد تلقائياً عشان يبرد، ولو وصلت 105°م يفصل تماماً.</p>`}
+function thermalUI(){if(!$('g1'))return;const cpu=PT.cpu.on;
+ $('g1').textContent=S.temp.toFixed(0)+'°م';$('g1').style.color=S.temp>95?'var(--bad)':S.temp>80?'var(--warn)':'var(--ok)';
+ $('g2').textContent=cpu?S.clock.toFixed(2)+' GHz':'—';$('g3').textContent=PT.cooler.on?Math.round(500+S.fan*1900)+' RPM':'مفيش';$('g4').textContent=S.power.toFixed(0)+' W';
+ let st=!cpu?['مفيش معالج','var(--bad)']:S.trip?['🛑 فصل للحماية','var(--bad)']:S.temp>90?['⚠️ Throttling: التردد بيقل','var(--warn)']:!PT.cooler.on?['⚠️ مفيش مبرد!','var(--warn)']:['✅ تشغيل طبيعي','var(--ok)'];
+ $('stt').innerHTML=`<span class="badge" style="background:${st[1]};color:#111">${st[0]}</span>`;
+ const c=$('ch'),x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
+ const yT=t=>H-(clamp(t,20,115)-20)/95*H;x.strokeStyle='rgba(255,255,255,.4)';x.setLineDash([4,4]);x.beginPath();x.moveTo(0,yT(90));x.lineTo(W,yT(90));x.stroke();x.setLineDash([]);
+ const line=(i,col,f)=>{x.strokeStyle=col;x.lineWidth=2;x.beginPath();S.hist.forEach((h,k)=>{const X=k/120*W,Yp=f(h[i]);k?x.lineTo(X,Yp):x.moveTo(X,Yp)});x.stroke()};
+ line(0,'#f87171',yT);line(1,'#4f8cff',v=>H-v/6*H)}
+
+/* ================= محاكي الإقلاع ================= */
+const BOOT=[['التشغيل','Power On','الباور سبلاي (PSU) بيبعت إشارة Power Good ويبدأ يدّي كهرباء للوحة من خلال كونكتور 24-Pin و8-Pin.','atx24'],['الفحص الذاتي','POST','فحص ذاتي للمعالج والذاكرة وكارت الشاشة. لو فيه عطل بيطلع أكواد صفير (Beep Codes) أو رقم خطأ على لمبة Debug.','ramslots'],['BIOS / UEFI','','بيقرأ الإعدادات المحفوظة (بطارية CMOS) وبيحدد جهاز الإقلاع.','bios'],['محمّل الإقلاع','Boot Loader','بيحمّل نواة نظام التشغيل من الـ SSD إلى الرام.','ssd'],['نظام التشغيل','OS','بيشغّل الخدمات وتظهر شاشة سطح المكتب.','gpu']];
+let bTok=0;
+function bootH(){return `<h2>🚀 محاكي الإقلاع</h2><p>اضغط تشغيل وشوف الجهاز بيقوم خطوة بخطوة. جرّب قبلها تخلع الرام أو المعالج أو الـ SSD أو البطارية أو المبرد!</p>
+ <button class="main" onclick="runBoot()">⚡ شغّل الجهاز</button>
+ ${BOOT.map((s,i)=>`<button class="step" onclick="bootStep(${i})"><b>${i+1}. ${s[0]}</b> <small>${s[1]}</small></button>`).join('')}
+ <div id="bd" class="card"></div><div id="warn"></div><div class="term" id="term"></div><div id="bres"></div>
+ <p class="tip">BIOS هو الأقدم (نصي)، وUEFI هو الحديث (رسومي وبيدعم Secure Boot وأقراص كبيرة). الدخول للإعدادات: Del أو F2 أو F10 أو F12.</p>`}
+function bootWarn(){const w=[];if(!PT.cpu.on)w.push('المعالج');if(![1,2,3,4].some(n=>PT['ram'+n].on))w.push('الرام');if(!PT.ssd.on)w.push('الـ SSD (مفيش جهاز إقلاع)');if(!PT.cooler.on&&PT.cpu.on)w.push('المبرد (هيسخن ويفصل)');if(!PT.battery.on)w.push('بطارية CMOS (الإعدادات هتتمسح)');
+ const e=$('warn');if(e)e.innerHTML=w.length?`<p class="tip">⚠️ متخلّع حالياً: ${w.join(' • ')}</p>`:''}
+function bootStep(i){document.querySelectorAll('#tc .step').forEach((b,j)=>b.classList.toggle('s',j===i));$('bd').innerHTML=`<b>${BOOT[i][0]}</b><p>${BOOT[i][2]}</p>`;hl(BOOT[i][3]);bootWarn()}
+function led(c){ledForce=c}
+async function runBoot(){const tok=++bTok,T=$('term');T.innerHTML='';$('bres').innerHTML='';
+ const L=(t,c)=>{if(tok!==bTok)return false;T.innerHTML+=`<div class="${c||''}">${t}</div>`;T.scrollTop=T.scrollHeight;return true};
+ const st=i=>{if(tok!==bTok)return;document.querySelectorAll('#tc .step').forEach((b,j)=>b.classList.toggle('s',j===i));$('bd').innerHTML=`<b>${BOOT[i][0]}</b><p>${BOOT[i][2]}</p>`;hl(BOOT[i][3])};
+ const fail=async(code,msg,why,n)=>{led(0xf87171);L('✖ '+msg,'er');for(let k=0;k<n;k++){snd(300,.35,'square',.05);await sleep(450)}if(tok===bTok)$('bres').innerHTML=`<div class="card" style="border-color:var(--bad)"><b>🔴 Debug LED: ${code}</b><p>${why}</p></div>`};
+ led(0xfbbf24);bootWarn();
+ st(0);await sleep(700);if(!L('Checking power rails ...'))return;await sleep(500);
+ if(!PT.cpu.on){await fail('CPU','No CPU detected','مفيش معالج: المراوح ممكن تلف لكن مفيش POST ولا صورة. ركّب المعالج من تاب المكونات.',2);return}
+ L('+12V ✔  +5V ✔  +3.3V ✔  — Power Good','ok');snd(700,.1,'sine',.05);await sleep(600);
+ st(1);if(tok!==bTok)return;L('POST: CPU ...');await sleep(500);
+ if(!PT.cooler.on)L('⚠ CPU_FAN error! (no cooler detected)','wr');L('CPU detected ✔','ok');await sleep(500);
+ const rams=[1,2,3,4].filter(n=>PT['ram'+n].on).length;
+ if(!rams){await fail('DRAM','No memory detected (3 long beeps)','مفيش رام: الجهاز مش هيكمل الـ POST وبيطلع صفير متكرر. ركّب شريحة رام واحدة على الأقل.',3);return}
+ L(`Memory test ${rams*8} GB ... OK${rams>=2?' (Dual Channel)':''}`,'ok');await sleep(500);
+ if(!PT.gpu.on)L('⚠ No discrete GPU — using integrated graphics (iGPU)','wr');else L('GPU detected ✔','ok');
+ snd(1000,.12,'sine',.05);await sleep(600);
+ st(2);if(tok!==bTok)return;L('Entering UEFI ...');await sleep(500);
+ if(!PT.battery.on)L('⚠ CMOS checksum error — defaults loaded (date/time reset)','wr');else L('CMOS settings loaded ✔','ok');await sleep(600);
+ st(3);if(tok!==bTok)return;
+ if(!PT.ssd.on){await fail('BOOT','No bootable device found. Insert boot disk and press any key','مفيش SSD: النظام مالوش مكان يتحمّل منه. ركّب الـ NVMe SSD في خانة M.2.',2);return}
+ L('Boot device: NVMe SSD ✔','ok');await sleep(500);L('Loading kernel ...');await sleep(700);
+ st(4);if(tok!==bTok)return;
+ if(!PT.cooler.on){L('CPU temp: 71°C ... 94°C ... 105°C','er');await sleep(700);await fail('TEMP','Thermal shutdown (CPU over-temperature)','المعالج من غير مبرد وصل لحرارة خطيرة وفصل الجهاز لحمايته. ركّب المبرد!',3);return}
+ L('Starting services ...');await sleep(600);L('Desktop ready 🎉','ok');led(0x34d399);
+ [523,659,784].forEach((f,i)=>snd(f,.18,'triangle',.05,i*.14));
+ $('bres').innerHTML=`<div class="card" style="border-color:var(--ok)"><b>🟢 الجهاز اشتغل بنجاح</b><p>المعالج، الرام، الـ SSD والمبرد شغالين وكل حاجة تمام.</p></div>`}
+
+/* ================= معمل المعالج ================= */
+const CY=[['Fetch (الجلب)','ينسخ التعليمة ADD R1,R2 من الرام إلى المعالج.',['ram','cu'],'ADD R1,R2','—','R1=12  R2=30  R3=?','ramslots'],['Decode (فك الشفرة)','وحدة التحكم CU تتعرف إنها عملية جمع.',['cu'],'decode: ADD','—','R1=12  R2=30  R3=?','cpu'],['Execute (التنفيذ)','وحدة ALU تجمع القيمتين: 12 + 30 = 42.',['alu'],'ADD R1,R2','12 + 30 = 42','R1=12  R2=30  R3=?','cpu'],['Store (التخزين)','النتيجة 42 تتكتب في المسجل R3، وبعدها تتجلب التعليمة التالية.',['reg'],'next ...','42','R1=12  R2=30  R3=42','ramslots']];
+let ci=-1;
+function cyc(){ci=(ci+1)%4;const s=CY[ci];['ram','cu','alu','reg'].forEach(b=>$('b-'+b).classList.toggle('on',s[2].includes(b)));$('cu-t').textContent=s[3];$('alu-t').textContent=s[4];$('reg-t').textContent=s[5];$('cyd').innerHTML=`<b>${ci+1}. ${s[0]}</b><br>${s[1]}`;hl(s[6])}
+function cyAuto(btn){if(tT){clearInterval(tT);tT=0;btn.textContent='▶ تشغيل تلقائي';return}btn.textContent='⏸ إيقاف';cyc();tT=setInterval(cyc,1700)}
+function clk(){const g=+$('gh').value;$('co').innerHTML=g>0?`<p>${g} GHz = ${(g*1e9).toLocaleString('en')} دورة في الثانية<br>زمن الدورة = 1 ÷ ${g} GHz ≈ ${(1/g).toFixed(3)} نانوثانية</p>`:''}
+function pipe(){const n=clamp(+$('pn').value||4,1,8),W=n+3;let h=`<div class="pg" style="grid-template-columns:repeat(${W},1fr)">`;for(let i=0;i<n;i++)for(let c=0;c<W;c++){const k=c-i;h+=k>=0&&k<4?`<i class="c${k}">${'FDES'[k]}</i>`:'<i></i>'}$('pp').innerHTML=h+`</div><p>بدون خط الأنابيب: ${4*n} دورة • معه: ${n+3} دورة</p>`}
+function amd(){const n=+$('cn').value,p=+$('cp').value/100,sp=1/((1-p)+p/n);$('cnv').textContent=n;$('cpv').textContent=Math.round(p*100)+'%';
+ $('ao').innerHTML=`<p>السرعة الفعلية ≈ <b>×${sp.toFixed(2)}</b> (مش ×${n}!)</p>`+[1,2,4,8,16,32].map(k=>{const s=1/((1-p)+p/k);return `<small>${k} أنوية: ×${s.toFixed(2)}</small><div class="bar" style="width:${s/32*100}%"></div>`}).join('')}
+const CACHE=[['Register',.3],['L1 Cache',1],['L2 Cache',4],['L3 Cache',12],['RAM',80],['NVMe SSD',80000]];
+function cpuH(){return `<h2>🧠 معمل المعالج</h2><p><b>وحدة التحكم CU</b> = المدير، <b>ALU</b> = الآلة الحاسبة، <b>المسجلات</b> = سطح المكتب، و<b>الكاش</b> ذاكرة سريعة للبيانات المستخدمة مؤخراً.</p>
+ <h3>دورة الآلة (Machine Cycle)</h3><div class="dg"><div class="blk" id="b-ram">RAM<small>[0x10]: ADD R1,R2</small></div><div class="blk" id="b-cu">CU<small id="cu-t">—</small></div><div class="blk" id="b-alu">ALU<small id="alu-t">—</small></div><div class="blk" id="b-reg">Registers<small id="reg-t">R1=12 R2=30 R3=?</small></div></div>
+ <div id="cyd" class="card">اضغط الخطوة التالية.</div><div class="row"><button class="main" style="margin:0" onclick="cyc()">الخطوة التالية ▶</button><button class="btn" onclick="cyAuto(this)">▶ تشغيل تلقائي</button></div>
+ <h3>سرعة الساعة</h3><label>التردد GHz <input id="gh" type="number" step="0.1" min="0.1" value="3.8" oninput="clk()"></label><div id="co"></div>
+ <p class="tip">GHz مش كل حاجة: معالج أحدث بـ 3 GHz ممكن يتفوق على قديم بـ 4 GHz.</p>
+ <h3>خط الأنابيب Pipelining</h3><label>عدد التعليمات <input id="pn" type="number" min="1" max="8" value="4" oninput="pipe()"></label><div id="pp"></div>
+ <h3>هرم الذاكرة (زمن الوصول)</h3>${CACHE.map(c=>`<small>${c[0]}: ${c[1]>=1000?(c[1]/1000)+' µs':c[1]+' ns'}</small><div class="bar" style="width:${(Math.log10(c[1])+.6)/5.6*100}%"></div>`).join('')}<small>(مقياس لوغاريتمي) كل ما قربت من المعالج بقت أسرع وأصغر وأغلى.</small>
+ <h3>الأنوية المتعددة وقانون Amdahl</h3><label>الأنوية: <b id="cnv">8</b></label><input id="cn" type="range" min="1" max="32" value="8" oninput="amd()"><label>الجزء الموازي من البرنامج: <b id="cpv">90%</b></label><input id="cp" type="range" min="50" max="99" value="90" oninput="amd()"><div id="ao"></div>
+ <details><summary>Hyperthreading</summary>النواة الواحدة تشغّل خيطين (Threads). مثال: 8 أنوية = 16 معالج منطقي. المكسب محدود لأن خيطين ≠ نواتين.</details>
+ <details><summary>التبريد ورفع السرعة</summary>مشتت + مروحة + معجون حراري، أو تبريد سائل. لو الحرارة عالية (حوالي 90–100°م) المعالج يبطّئ نفسه. Overclocking = أداء أعلى مع حرارة وطاقة أكتر. جرّبه في تاب «الأداء».</details>
+ <details><summary>اختيار المعالج</summary>Intel Core (i3/i5/i7/i9) وAMD Ryzen (3/5/7/9) وARM (Apple M وSnapdragon). اللاعب: 8+ أنوية وكاش كبير. المستخدم العادي: 4–6 أنوية. المحمول: كفاءة وبطارية. قارن بـ Benchmarks مش بالـ GHz بس.</details>`}
+
+/* ================= الاختبارات والتحديات ================= */
+const QT=['socket','ramslots','chipset','pcie','m2','sata','bios','battery','atx24','io','cpu8','gpu','cooler','ssd','vrm','pciex1'];
+const QS=[['اذكر أربعة مكونات على اللوحة الأم.','مثلاً: سوكت المعالج، فتحات الرام، الشيبست، فتحات PCIe، M.2، SATA، BIOS.'],['ما وظيفة الفحص الذاتي POST؟','يفحص المعالج والذاكرة والأجهزة عند بدء التشغيل.'],['وظيفة وحدة التحكم و ALU؟','CU تجلب وتفك التعليمات وتنسّق الأجزاء، وALU تجري العمليات الحسابية والمنطقية.'],['مراحل دورة الآلة بالترتيب؟','Fetch ← Decode ← Execute ← Store'],['معالج 2.5 GHz: كم دورة في الثانية وما زمن الدورة؟','2.5 مليار دورة في الثانية، وزمن الدورة = 1 ÷ 2.5 GHz = 0.4 نانوثانية.'],['كم دورة لأربع تعليمات بدون خط أنابيب ومعه؟','16 دورة بدونه، و7 دورات معه.'],['ليه لازم تخلع المبرد قبل المعالج؟','لأن المبرد متثبّت فوق المعالج بالمعجون الحراري، وفكّه الأول بيحمي دبابيس السوكت.'],['الفرق بين BIOS وUEFI؟','BIOS قديم بواجهة نصية، وUEFI حديث برسومية وماوس وأقراص كبيرة وإقلاع آمن (Secure Boot).'],['ليه الـ Dual Channel أسرع؟','لأن شريحتين بتشتغلوا بالتوازي فبيضاعفوا عرض نطاق الذاكرة.'],['إيه اللي بيحصل لو الحرارة عدّت 90°م؟','المعالج بيقلّل التردد (Thermal Throttling)، ولو زادت جداً بيفصل لحماية نفسه.']];
+let qz=null,ch=null,tT=0;
+const best=()=>{try{return +localStorage.getItem('mb_best')||0}catch(e){return 0}};
+function quizH(){return `<h2>🎯 اختبر نفسك</h2>
+ <div class="card"><b>1) سمّي الأجزاء</b><p>هسألك عن 10 قطع، وتضغط عليها في المجسّم. أفضل نتيجة: <b>${best()}</b>/100</p><button class="main" style="margin:0" onclick="startId()">ابدأ التمرين</button></div>
+ <div class="card"><b>2) تحدي التركيب ⏱️</b><p>كل القطع هتتخلع، ركّبها كلها بأسرع وقت (والمعالج قبل المبرد).</p><button class="main" style="margin:0" onclick="startCh()">ابدأ التحدي</button></div>
+ <div id="qa"></div><h3>أسئلة المراجعة</h3>${QS.map((q,i)=>`<details><summary>Q${i+1}: ${q[0]}</summary>${q[1]}</details>`).join('')}`}
+function startId(){qz={q:shuffle(QT).slice(0,10),i:0,s:0,w:0,t0:Date.now()};$('qa').innerHTML='<div id="qq" class="tip"></div>';nextQ()}
+function nextQ(){if(qz.i>=qz.q.length){const sc=qz.s,b=best();try{if(sc>b)localStorage.setItem('mb_best',sc)}catch(e){}qHint=null;$('qa').innerHTML=`<div class="card" style="border-color:var(--ok)"><b>🎉 خلصت! نتيجتك ${sc}/100</b><p>${sc>=90?'ممتاز! 🏆':sc>=60?'كويس جداً 👏':'كمّل تدريب وهتتحسّن 💪'}</p></div>`;qz=null;return}
+ $('qq').innerHTML=`${qz.i+1}/${qz.q.length} — فين <b>${DATA[qz.q[qz.i]].n}</b> <small>(${DATA[qz.q[qz.i]].en})</small>؟<br><small>النقاط: ${qz.s}</small>`;qHint=null;qz.m=0}
+function qHook(id){const t=qz.q[qz.i];if(id===t){qz.s+=Math.max(2,10-qz.m*4);PT[id].fl=1;PT[id].fc=0x34d399;snd(660,.12,'triangle',.05);snd(880,.12,'triangle',.05,.1);qz.i++;nextQ()}
+ else{qz.m++;snd(180,.2,'square',.04);toast(qz.m>=2?'مش ده، الجزء بيلمع دلوقتي 👀':'مش ده، جرّب تاني');if(qz.m>=2)qHint=t}return true}
+function startCh(){setAll(false);ch={t0:Date.now(),done:false};chCheck()}
+function chCheck(){if(!ch||!$('qa'))return;const rem=ORDER.filter(i=>PT[i].rem);const left=rem.filter(i=>!PT[i].on);
+ if(!left.length&&!ch.done){ch.done=true;ch.t=((Date.now()-ch.t0)/1000).toFixed(1);[523,659,784,1046].forEach((f,i)=>snd(f,.15,'triangle',.05,i*.12))}
+ $('qa').innerHTML=ch.done?`<div class="card" style="border-color:var(--ok)"><b>🏁 خلصت التركيب في ${ch.t} ثانية!</b></div>`:`<div class="card"><b>⏱️ <span id="chT">0.0</span> ث</b> — باقي ${left.length}<br>${rem.map(i=>`<button class="pi ${PT[i].on?'s':''}" onclick="toggle('${i}')">${PT[i].on?'✔':'○'} ${lab(i)}</button> `).join('')}</div>`}
+
+/* ================= التبويبات ================= */
+const TABS=[['🔍','المكونات'],['🚀','الإقلاع'],['🧠','المعالج'],['🌡️','الأداء'],['🎯','اختبار']];
+let cur=-1;
+$('tabs').innerHTML=TABS.map((t,i)=>`<button onclick="tab(${i})"><span>${t[0]}</span>${t[1]}</button>`).join('');
+function tab(i){if(cur===i&&i!==0)return;if(qz&&i!==4)qz=null;qHint=null;if(i!==4)ch=null;clearInterval(tT);tT=0;bTok++;ledForce=null;cur=i;
+ [...$('tabs').children].forEach((b,j)=>b.classList.toggle('s',j===i));
+ if(i===0){renderInfo();return}
+ $('tc').innerHTML=[null,bootH,cpuH,thermalH,quizH][i]();
+ if(i===1){bootStep(0);bootWarn()}
+ if(i===2){clk();pipe();amd()}
+ if(i===3){tT=setInterval(thermalUI,120)}
+ if(i===4){tT=setInterval(()=>{if(ch&&!ch.done&&$('chT'))$('chT').textContent=((Date.now()-ch.t0)/1000).toFixed(1)},100)}
+ renderList()}
+
+/* ================= الحلقة الرئيسية ================= */
+const LB={},lbv=new THREE.Vector3();let last=performance.now(),T=0;
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
+ exCur+=(exT-exCur)*Math.min(1,dt*6);
+ ORDER.forEach(id=>{const p=PT[id],ty=p.home+(p.on?0:LIFT[id]||0)+exCur*p.ex;p.g.position.y+=(ty-p.g.position.y)*Math.min(1,dt*8)});
+ simStep(dt);
+ RGB.forEach(r=>r[0].color.setHSL((T*.12+r[1])%1,1,.55));
+ const gs=PT.gpu.on&&!S.trip?.2+S.load/100*.8:0;
+ FANS.forEach(f=>{f.s.rotation.y+=dt*(f.type==='cpu'?(PT.cpu.on&&!S.trip?S.fan*34+.8:0):gs*30+.8*(PT.gpu.on?1:0))});
+ if(PT.cpu.x.gl)PT.cpu.x.gl.material.opacity=clamp((S.temp-55)/55,0,.85);
+ LED.material.color.setHex(ledForce!==null?ledForce:S.trip?0xf87171:S.temp>90?0xfbbf24:0x34d399);
+ const fv=flowOn&&exCur<.15&&!S.trip,sp=.1+S.load/100*.45;
+ FL.forEach(f=>{const v=fv&&f.need();f.grp.visible=v;if(v)f.ps.forEach((q,i)=>{let u=(i/f.ps.length+T*sp*(i%2?-1:1))%1;if(u<0)u+=1;q.position.copy(f.cv.getPoint(u))})});
+ ORDER.forEach(id=>{const p=PT[id];let c=0,i=0;if(id===sel){c=0x2f6bff;i=.45+.25*Math.sin(T*3)}else if(id===hov){c=0x1d4ed8;i=.3}
+  if(p.fl>0){c=p.fc;i=Math.max(i,p.fl);p.fl-=dt*1.2}
+  if(qHint===id){c=0xfbbf24;i=.5+.4*Math.sin(T*8)}
+  p.mats.forEach(m=>{m.emissive.setHex(c);m.emissiveIntensity=i})});
+ camUpdate();
+ const W=stage.clientWidth,H=stage.clientHeight,show=new Set(labelsOn?ORDER:[]);if(sel)show.add(sel);if(hov)show.add(hov);
+ ORDER.forEach(id=>{let e=LB[id];if(!show.has(id)){if(e)e.style.display='none';return}
+  if(!e){e=LB[id]=document.createElement('div');e.className='lb';e.textContent=lab(id);$('labels').appendChild(e)}
+  const p=PT[id];lbv.set(p.g.position.x+p.c.x,p.g.position.y+p.top+.25,p.g.position.z+p.c.z).project(cam);
+  if(lbv.z>1){e.style.display='none';return}e.style.display='block';e.classList.toggle('s',id===sel);
+  e.style.transform=`translate(${(lbv.x*.5+.5)*W}px,${(-lbv.y*.5+.5)*H}px) translate(-50%,-110%)`});
+ R.render(scene,cam)}
+requestAnimationFrame(loop);
+tab(0);view('iso');
+</script>
+</body>
+</html>
